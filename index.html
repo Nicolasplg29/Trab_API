@@ -92,12 +92,19 @@
     .home-card ul li { margin-bottom: 8px; display: flex; align-items: center; gap: 8px;}
     .home-card ul li::before { content: '■'; color: var(--accent); font-size: 8px; }
 
-    /* ─── RENDERIZADORES GRÁFICOS ─── */
+    /* ─── TABELAS E COMPONENTES GRÁFICOS CIENTÍFICOS ─── */
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
+    .table-container { width: 100%; overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+    th { background: var(--surface2); padding: 12px 16px; font-family: 'Syne', sans-serif; font-weight: 700; border-bottom: 1px solid var(--border); color: var(--accent); }
+    td { padding: 12px 16px; border-bottom: 1px solid var(--border); color: var(--muted); }
+    tr:hover td { color: #fff; background: rgba(255,255,255,0.02); }
+
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; transition: 0.3s; cursor: pointer; }
     .card:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
     .card-img { width: 100%; height: 200px; object-fit: cover; border-bottom: 1px solid var(--border); }
     .card-body { padding: 20px; flex: 1; }
+    
     .tag { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: 1px; margin-bottom: 15px; border: 1px solid var(--border); background: var(--surface2); }
     .tag.danger { border-color: var(--red); color: var(--red); background: rgba(248,81,73,0.1); }
     .tag.success { border-color: var(--green); color: var(--green); background: rgba(63,185,80,0.1); }
@@ -112,18 +119,18 @@
     .apod-data h2 { font-family: 'Syne', sans-serif; font-size: 28px; margin-bottom: 10px; color: var(--text); line-height: 1.2;}
     .apod-data p { color: var(--muted); font-size: 14px; line-height: 1.8; margin-top: 20px; }
 
-    /* InSight Weather widgets */
+    /* InSight Weather */
     .insight-dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; width: 100%; margin-top: 15px; }
     .insight-widget { background: var(--surface2); border: 1px solid var(--border); padding: 15px; border-radius: 8px; text-align: center; }
     .insight-label { font-size: 11px; color: var(--accent); text-transform: uppercase; margin-bottom: 5px; }
     .insight-val { font-size: 20px; font-weight: 700; color: #fff; }
 
-    /* Exoplanets Table */
-    .table-container { width: 100%; overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
-    th { background: var(--surface2); padding: 12px 16px; font-family: 'Syne', sans-serif; font-weight: 700; border-bottom: 1px solid var(--border); }
-    td { padding: 12px 16px; border-bottom: 1px solid var(--border); color: var(--muted); }
-    tr:hover td { color: #fff; background: rgba(255,255,255,0.02); }
+    /* TLE Telemetry Widget */
+    .tle-telemetry { background: var(--surface); border: 1px solid var(--border); padding: 24px; border-radius: 12px; margin-bottom: 24px; }
+    .tle-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 15px; }
+    .tle-box { background: var(--surface2); padding: 15px; border-radius: 8px; border: 1px solid var(--border); }
+    .tle-label { font-size: 11px; color: var(--accent2); text-transform: uppercase; margin-bottom: 4px;}
+    .tle-val { font-size: 18px; font-weight: 700; color: #fff; font-family: 'Space Mono', monospace; }
 
     /* Terminal JSON */
     .terminal { background: #000; border: 1px solid var(--border); border-radius: 8px; padding: 20px; font-size: 13px; line-height: 1.6; overflow-x: auto; }
@@ -229,7 +236,7 @@
     <div class="content-area">
       <div class="status-msg" id="status" style="display:none;">Aguardando comando do operador...</div>
       <div id="render-zone">
-        <!-- Home ou renderização de dados das APIs -->
+        <!-- O conteúdo da Home ou das APIs entra aqui -->
       </div>
     </div>
 
@@ -284,7 +291,7 @@
       tech: {
         title: "Patentes da NASA",
         desc: "Acesso estruturado às patentes de engenharia e tecnologia desenvolvidas pela agência espacial.",
-        tips: "<b>Áreas de Pesquisa Comuns:</b><ul><li>laser (Sistemas ópticos de precisão)</li><li>engine (Propulsão química e iônica)</li><li>software (Linguagens e sistemas de bordo)</li><li>materials (Superligas metálicas de proteção térmica)</li></ul>",
+        tips: "<b>Áreas de Pesquisa Comuns:</b><ul><li>materials (Novos compostos e blindagem térmica)</li><li>laser (Sistemas ópticos de precisão)</li><li>engine (Propulsão química e iônica)</li><li>software (Linguagens e sistemas de bordo)</li></ul>",
         call: "GET /techtransfer/patent?q={termo}", return: "Array de projetos com Número da Patente, Título e Blueprint (imagem).",
         path: "/techtransfer/patent", type: "text", paramKey: "q", placeholder: "Digite um termo em inglês..."
       },
@@ -297,7 +304,7 @@
       ssd: {
         title: "Impactos Atmosféricos (Fireballs)",
         desc: "Relatório de sensores do governo americano que detectam bolas de fogo explodindo na atmosfera da Terra.",
-        call: "GET /ssd/fireball", return: "Matriz bruta de energia e localização dos impactos.",
+        call: "GET /ssd/fireball", return: "Matriz de dados de meteoros e poeira cometária.",
         path: "/ssd/fireball"
       },
       tle: {
@@ -327,7 +334,6 @@
     window.onload = () => {
       document.getElementById('param-input').max = new Date().toISOString().split('T')[0];
       
-      // Captura tecla enter para usabilidade
       document.getElementById('param-input').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') fetchData();
       });
@@ -458,32 +464,48 @@
       try {
         const res = await fetch(url);
         if (!res.ok) {
-           throw new Error(`HTTP_${res.status}`);
+           // Se o servidor respondeu com erro, lê o detalhe estruturado
+           const errData = await res.json().catch(() => ({ detail: `HTTP ${res.status} - Erro de resposta` }));
+           throw new Error(errData.detail || `Erro HTTP ${res.status}`);
         }
         
         const data = await res.json();
-        status.innerHTML = '✅ Dados decodificados com sucesso.';
-        drawCoolStuff(currentApiId, data);
+        status.innerHTML = '✅ Dados recebidos.';
+        
+        // Proteção extra contra quebra de rendering no frontend por dados inconsistentes da NASA
+        try {
+          drawCoolStuff(currentApiId, data);
+          status.innerHTML = '✅ Telemetria de interface renderizada com sucesso.';
+        } catch (uiErr) {
+          console.error(uiErr);
+          status.innerHTML = '<span style="color:var(--amber)">⚠️ ERRO DE RENDERIZAÇÃO DA UI</span>';
+          renderZone.innerHTML = `
+            <div class="terminal" style="border-color: var(--amber)">
+              <span style="color: var(--amber); font-weight: bold;">[ WARNING ] Falha parcial ao formatar dados graficamente</span><br><br>
+              Os dados foram baixados da NASA, mas as propriedades são inconsistentes para renderização visual.<br>
+              Exibindo fluxo bruto de dados (JSON) abaixo:<br><br>
+              <pre class="terminal">${colorJSON(data)}</pre>
+            </div>
+          `;
+        }
         
       } catch (err) {
-        status.innerHTML = '<span style="color:var(--red)">❌ FALHA CRÍTICA DE COMUNICAÇÃO</span>';
+        status.innerHTML = '<span style="color:var(--red)">❌ ERRO DE PROCESSAMENTO</span>';
         
-        let errorTitle = "SISTEMA OFFLINE OU ERRO DE ROTA";
-        let errorDesc = "O navegador não conseguiu contactar o servidor Backend. Certifique-se de que o FastAPI está em execução no terminal do seu computador.";
+        // Distingue entre queda física do servidor ou um erro de status tratado pelo FastAPI
+        let errorTitle = "CONEXÃO RECUSADA / SERVIDOR OFFLINE";
+        let errorDesc = "O navegador não conseguiu contactar o servidor Backend. Certifique-se de que o FastAPI está rodando no terminal.";
         
-        if (err.message.includes('404')) {
-          errorTitle = "ALVO NÃO ENCONTRADO (404)";
-          errorDesc = "A NASA não retornou dados para este parâmetro. Verifique se o termo ou a data estão corretos.";
-        } else if (err.message.includes('429')) {
-          errorTitle = "BANDA EXCEDIDA (429)";
-          errorDesc = "Limite de chamadas da API Key atingido. A NASA bloqueou temporariamente a comunicação.";
+        if (err.message.includes('HTTP_') || err.message.includes('Erro HTTP') || err.message.includes('NASA_API_ERROR')) {
+          errorTitle = "ERRO NA RESPOSTA DO GATEWAY";
+          errorDesc = `O servidor respondeu com um erro estruturado: <br><br><span style="color:var(--red); font-family:monospace;">${err.message}</span><br><br>Verifique as instruções e os parâmetros informados no manual acima.`;
         }
 
         renderZone.innerHTML = `
           <div class="alert-box">
             <h2>${errorTitle}</h2>
             <p>${errorDesc}</p>
-            <p style="margin-top:15px; color:var(--muted); font-size:12px;">Comando de inicialização do servidor local:</p>
+            <p style="margin-top:15px; color:var(--muted); font-size:12px;">Se o seu servidor estiver desligado, execute o comando abaixo no terminal:</p>
             <div class="code-cmd">python -m uvicorn main:app --reload</div>
           </div>
         `;
@@ -505,9 +527,47 @@
     function drawCoolStuff(id, data) {
       const zone = document.getElementById('render-zone');
 
-      // TRATATIVA DE ERRO DE ENDPOINT DESCONTINUADO (InSight Mars Lander)
+      // Se o back-end devolveu a estrutura xml_raw ou vazia
+      if (data.format === 'xml_raw') {
+        return zone.innerHTML = `<div style="color:var(--muted); font-size:11px; margin-bottom:8px;">// RAW XML PAYLOAD</div><pre class="terminal">${data.preview.replace(/</g, '&lt;')}</pre>`;
+      }
+      if (data.format === 'empty_stable') {
+        return zone.innerHTML = `
+          <div class="alert-box" style="border-color:var(--green); background:rgba(63,185,80,0.1); padding: 40px;">
+            <h2 style="color:var(--green); font-size: 32px; margin-bottom: 15px;">🛡️ DEFESAS OPERACIONAIS ESTÁVEIS</h2>
+            <p style="color:var(--text); font-size: 16px; max-width: 600px; margin: 0 auto; line-height: 1.8;">${data.mensagem}</p>
+          </div>
+        `;
+      }
+
+      // TRATATIVA DE ERRO DE ENDPOINT DESCONTINUADO OU OFFLINE (InSight & Mars Rover)
       if (data.status === 'offline_preservado') {
         const payload = data.payload;
+        
+        // Se for o Mars Rover
+        if (data.missao && data.missao.includes('Rover')) {
+          let html = `
+            <div class="alert-box" style="border-color:var(--amber); background:rgba(210,153,34,0.1); margin-bottom: 24px;">
+              <h2>📡 TELEMETRIA DE CONTINGÊNCIA ATIVADA</h2>
+              <p style="color:var(--text);">${data.mensagem}</p>
+            </div>
+            <div class="grid">
+          `;
+          payload.photos.forEach(p => {
+            html += `
+              <div class="card" onclick="openModal('${p.img_src}', 'Rover ${payload.rover}', 'Sol ${payload.sol} - Câmera: ${p.camera.name}')">
+                <img class="card-img" src="${p.img_src}">
+                <div class="card-body">
+                  <span class="tag danger">ARQUIVO HISTÓRICO</span>
+                  <div class="card-title">Câmera: ${p.camera.name}</div>
+                  <div class="card-info">Sol: ${payload.sol} (Terra: ${p.earth_date})</div>
+                </div>
+              </div>`;
+          });
+          return zone.innerHTML = html + '</div>';
+        }
+
+        // Se for a sonda InSight
         return zone.innerHTML = `
           <div class="alert-box" style="border-color:var(--amber); background:rgba(210,153,34,0.1); margin-bottom: 24px;">
             <h2>📡 TELEMETRIA DE CONTINGÊNCIA ATIVADA</h2>
@@ -552,25 +612,11 @@
         `;
       }
 
-      // TRATATIVA DE RESPOSTAS VAZIAS (DONKI / SSD / ESTABILIDADE)
-      if (data.format === 'empty_stable') {
-        return zone.innerHTML = `
-          <div class="alert-box" style="border-color:var(--green); background:rgba(63,185,80,0.1); padding: 40px;">
-            <h2 style="color:var(--green); font-size: 32px; margin-bottom: 15px;">🛡️ DEFESAS OPERACIONAIS ESTÁVEIS</h2>
-            <p style="color:var(--text); font-size: 16px; max-width: 600px; margin: 0 auto; line-height: 1.8;">${data.mensagem}</p>
-          </div>
-        `;
-      }
-
-      if (data.format === 'xml_raw') {
-        return zone.innerHTML = `<div style="color:var(--muted); font-size:11px; margin-bottom:8px;">// RAW XML PAYLOAD</div><pre class="terminal">${data.preview.replace(/</g, '&lt;')}</pre>`;
-      }
-
       if (Array.isArray(data) && data.length === 0) {
          return zone.innerHTML = `<div class="alert-box" style="padding:2rem;"><h2>VAZIO</h2><p>A NASA não retornou nenhum dado para esta consulta.</p></div>`;
       }
 
-      // APOD (Astronomy Picture of the Day)
+      // 1. APOD
       if (id === 'apod') {
         const media = data.media_type === 'video' ? `<iframe src="${data.url}" height="400"></iframe>` : `<img src="${data.url}" style="cursor:zoom-in" onclick="openModal('${data.url}', '${data.title.replace(/'/g, "&apos;")}', 'Data da Captura')">`;
         return zone.innerHTML = `
@@ -585,8 +631,9 @@
           </div>`;
       }
 
-      // EPIC (Imagens da Terra)
+      // 2. EPIC
       if (id === 'epic') {
+        if (!Array.isArray(data)) return zone.innerHTML = `<div style="color:var(--muted); font-size:11px; margin-bottom:8px;">// JSON DATA STREAM</div><pre class="terminal">${colorJSON(data)}</pre>`;
         let html = '<div class="grid">';
         data.slice(0, 6).forEach(img => {
           const dt = img.date.split(' ')[0].split('-');
@@ -604,14 +651,17 @@
         return zone.innerHTML = html + '</div>';
       }
 
-      // NEOWS (Risco de Impactos de Asteroides)
+      // 3. NEOWS
       if (id === 'neows') {
+        if (!data.near_earth_objects) return zone.innerHTML = `<div style="color:var(--muted); font-size:11px; margin-bottom:8px;">// JSON DATA STREAM</div><pre class="terminal">${colorJSON(data)}</pre>`;
         let html = '<div class="grid">';
-        Object.keys(data.near_earth_objects || {}).forEach(day => {
-          data.near_earth_objects[day].slice(0, 6).forEach(ast => {
+        Object.keys(data.near_earth_objects).forEach(day => {
+          const list = data.near_earth_objects[day] || [];
+          list.slice(0, 6).forEach(ast => {
             const danger = ast.is_potentially_hazardous_asteroid;
-            const size = parseFloat(ast.estimated_diameter.meters.estimated_diameter_max).toFixed(1);
-            const vel = parseFloat(ast.close_approach_data[0].relative_velocity.kilometers_per_hour).toFixed(0);
+            const size = ast.estimated_diameter?.meters?.estimated_diameter_max ? parseFloat(ast.estimated_diameter.meters.estimated_diameter_max).toFixed(1) : 'N/A';
+            const vel = ast.close_approach_data?.[0]?.relative_velocity?.kilometers_per_hour ? parseFloat(ast.close_approach_data[0].relative_velocity.kilometers_per_hour).toFixed(0) : 'N/A';
+            const appDate = ast.close_approach_data?.[0]?.close_approach_date || 'N/A';
             html += `
               <div class="card" style="cursor:default; ${danger ? 'border-color:var(--red); box-shadow:0 0 20px rgba(248,81,73,0.2);' : ''}">
                 <div class="card-body">
@@ -620,7 +670,7 @@
                   <div class="card-info">
                     <br>> Diâmetro Máx: <b>${size} m</b>
                     <br>> Velocidade: <b>${vel} km/h</b>
-                    <br>> Aproximação: <b>${ast.close_approach_data[0].close_approach_date}</b>
+                    <br>> Aproximação: <b>${appDate}</b>
                   </div>
                 </div>
               </div>`;
@@ -629,20 +679,22 @@
         return zone.innerHTML = html + '</div>';
       }
 
-      // TECH TRANSFER (Patentes da NASA)
+      // 4. TECH TRANSFER
       if (id === 'tech') {
-        const results = data.results?.slice(0, 9) || [];
+        const results = data.results || [];
+        if (!Array.isArray(results) || !results.length) return zone.innerHTML = `<div class="alert-box"><h2>NADA ENCONTRADO</h2><p>Nenhuma patente indexada com esta palavra-chave.</p></div>`;
         let html = '<div class="grid">';
         results.forEach(p => {
           const img = p[10] || 'https://via.placeholder.com/400x200/161b22/58a6ff?text=BLUEPRINT+CONFIDENCIAL';
-          const desc = p[3].replace(/<[^>]*>?/gm, '').substring(0, 100);
-          const safeTitle = p[2].replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+          const desc = p[3] ? p[3].replace(/<[^>]*>?/gm, '').substring(0, 100) : 'Sem descrição';
+          const title = p[2] || 'Patente';
+          const safeTitle = title.replace(/'/g, "&apos;").replace(/"/g, "&quot;");
           html += `
-            <div class="card" onclick="openModal('${img}', '${safeTitle}', 'Patente: ${p[1]}')">
-              <img class="card-img" src="${img}" onerror="this.style.display='none'">
+            <div class="card" onclick="openModal('${img}', '${safeTitle}', 'Patente: ${p[1] || 'N/A'}')">
+              <img class="card-img" src="${img}" onerror="this.src='https://via.placeholder.com/400x200/161b22/58a6ff?text=BLUEPRINT+CONFIDENCIAL'">
               <div class="card-body">
-                <span class="tag" style="background:#000; border-color:var(--accent); color:var(--accent)">PATENTE: ${p[1]}</span>
-                <div class="card-title">${p[2]}</div>
+                <span class="tag" style="background:#000; border-color:var(--accent); color:var(--accent)">PATENTE: ${p[1] || 'N/A'}</span>
+                <div class="card-title">${title}</div>
                 <div class="card-info">${desc}...</div>
               </div>
             </div>`;
@@ -650,8 +702,9 @@
         return zone.innerHTML = html + '</div>';
       }
 
-      // EXOPLANETS (Tabela Científica Organizada)
+      // 5. EXOPLANETS
       if (id === 'exoplanet') {
+        if (!Array.isArray(data)) return zone.innerHTML = `<div style="color:var(--muted); font-size:11px; margin-bottom:8px;">// JSON DATA STREAM</div><pre class="terminal">${colorJSON(data)}</pre>`;
         let html = `
           <div class="table-container">
             <table>
@@ -681,15 +734,20 @@
         return zone.innerHTML = html;
       }
 
-      // EONET (Monitoramento de Desastres Ativos)
+      // 6. EONET
       if (id === 'eonet') {
+        const events = data.events;
+        if (!Array.isArray(events) || !events.length) {
+          return zone.innerHTML = `<div style="color:var(--muted); font-size:11px; margin-bottom:8px;">// JSON DATA STREAM</div><pre class="terminal">${colorJSON(data)}</pre>`;
+        }
         let html = '<div class="grid">';
-        data.events?.slice(0, 9).forEach(ev => {
+        events.slice(0, 9).forEach(ev => {
+          const catTitle = ev.categories?.[0]?.title || 'Evento Natural';
           html += `
             <div class="card" style="cursor:default; border-color:var(--amber);">
               <div class="card-body">
-                <span class="tag" style="background:var(--amber); color:#000; border:none;">🚨 ${ev.categories[0]?.title}</span>
-                <div class="card-title">${ev.title}</div>
+                <span class="tag" style="background:var(--amber); color:#000; border:none;">🚨 ${catTitle}</span>
+                <div class="card-title">${ev.title || 'Evento'}</div>
                 <div class="card-info"><br>Ocorrência registrada no sistema EONET. Em monitoramento ativo pelas agências globais.</div>
               </div>
             </div>`;
@@ -697,20 +755,141 @@
         return zone.innerHTML = html + '</div>';
       }
 
-      // ROVERS E LIBRARY
+      // 7. ROVERS E LIBRARY (Galeria Clicável)
       if (id === 'library' || id === 'rovers') {
-        let items = id === 'library' ? (data.collection?.items || []) : (data.photos || []);
+        let items = [];
+        if (id === 'library') {
+          items = data.collection?.items || [];
+        } else {
+          items = data.photos || [];
+        }
+        if (!Array.isArray(items) || items.length === 0) {
+          return zone.innerHTML = `<div class="alert-box"><h2>NADA ENCONTRADO</h2><p>Nenhuma mídia foi localizada para esta busca.</p></div>`;
+        }
         let html = '<div class="grid">';
         items.slice(0, 12).forEach(i => {
           const img = id === 'library' ? i.links?.[0]?.href : i.img_src;
-          const title = id === 'library' ? i.data[0].title : `Câmera: ${i.camera.name}`;
+          const title = id === 'library' ? (i.data?.[0]?.title || 'Mídia Espacial') : `Rover ${i.rover?.name || ''} - ${i.camera?.name || ''}`;
           if(!img) return;
           const safeTitle = title.replace(/'/g, "&apos;").replace(/"/g, "&quot;");
           html += `
-            <div class="card" onclick="openModal('${img}', '${safeTitle}', 'Mídia Exploratória')">
+            <div class="card" onclick="openModal('${img}', '${safeTitle}', 'Arquivo de Mídia da Base')">
               <img class="card-img" src="${img}">
               <div class="card-body">
                 <div class="card-title">${title}</div>
+              </div>
+            </div>`;
+        });
+        return zone.innerHTML = html + '</div>';
+      }
+
+      // 8. TLE TELEMETRY PARSE
+      if (id === 'tle') {
+        const item = data.member?.[0] || data;
+        if (!item || !item.line1 || !item.line2) {
+          return zone.innerHTML = `<pre class="terminal">${colorJSON(data)}</pre>`;
+        }
+        const inc = item.line2.substring(8, 16).trim();
+        const ecc = "0." + item.line2.substring(26, 33).trim();
+        const rev = item.line2.substring(52, 63).trim();
+        const period = (1440 / parseFloat(rev)).toFixed(2);
+
+        return zone.innerHTML = `
+          <div class="tle-telemetry">
+            <span class="tag success" style="margin-bottom:10px;">ID COSPAR: ${item.line1.substring(9, 17).trim()}</span>
+            <h2 style="font-family:'Syne',sans-serif; font-size:24px; color:#fff;">Sistemas Orbitais: ${item.name}</h2>
+            <p style="color:var(--muted); font-size:12px; margin-top:5px; font-family:'Space Mono',monospace;">Elemento de Telemetria de Duas Linhas (TLE) processado:</p>
+            <pre class="terminal" style="margin-top:15px; margin-bottom:20px; font-size:11px;">
+${item.line1}
+${item.line2}</pre>
+            <div class="tle-grid">
+              <div class="tle-box">
+                <div class="tle-label">Inclinação</div>
+                <div class="tle-val">${inc}°</div>
+              </div>
+              <div class="tle-box">
+                <div class="tle-label">Excentricidade</div>
+                <div class="tle-val">${ecc}</div>
+              </div>
+              <div class="tle-box">
+                <div class="tle-label">Revoluções por Dia</div>
+                <div class="tle-val">${rev}</div>
+              </div>
+              <div class="tle-box">
+                <div class="tle-label">Período Orbital</div>
+                <div class="tle-val">~${period} min</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // 9. SSD/CNEOS FIREBALLS (Mapeamento Matricial Gráfico)
+      if (id === 'ssd') {
+        if (!data.data || !data.data.length) {
+          return zone.innerHTML = `<pre class="terminal">${colorJSON(data)}</pre>`;
+        }
+        
+        let html = `
+          <div style="margin-bottom:16px; font-size:12px; color:var(--accent); font-family:'Space Mono',monospace;">
+            // REGISTRO DE IMPACTOS ATMOSFÉRICOS DE METEOROS RECENTES (SSD/CNEOS)
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data / Hora (UTC)</th>
+                  <th>Energia Liberada (kt)</th>
+                  <th>Velocidade (km/s)</th>
+                  <th>Altitude do Pico (km)</th>
+                  <th>Coordenadas Geográficas</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+        
+        data.data.slice(0, 15).forEach(row => {
+          const date = row[0] || 'N/A';
+          const energy = row[1] || 'N/A';
+          const vel = row[3] || 'N/A';
+          const alt = row[8] || 'N/A';
+          const coords = (row[4] && row[6]) ? `${row[4]}°${row[5]} / ${row[6]}°${row[7]}` : 'N/A';
+          html += `
+            <tr>
+              <td style="color:var(--accent); font-weight:bold;">${date}</td>
+              <td style="color:var(--amber);">${energy} kt</td>
+              <td>${vel !== 'N/A' ? vel + ' km/s' : 'N/A'}</td>
+              <td>${alt !== 'N/A' ? alt + ' km' : 'N/A'}</td>
+              <td style="font-family:'Space Mono',monospace; font-size:11px;">${coords}</td>
+            </tr>
+          `;
+        });
+        
+        html += `</tbody></table></div>`;
+        return zone.innerHTML = html;
+      }
+
+      // 10. REPOSITÓRIOS ABERTOS (OSDR Search)
+      if (id === 'raw') {
+        const hits = data.hits?.hits;
+        if (!Array.isArray(hits) || !hits.length) {
+          return zone.innerHTML = `<div style="color:var(--muted); font-size:11px; margin-bottom:8px;">// JSON DATA STREAM</div><pre class="terminal">${colorJSON(data)}</pre>`;
+        }
+        let html = '<div class="grid">';
+        hits.forEach(hit => {
+          const src = hit._source || {};
+          const title = src.title || 'Estudo Espacial';
+          const accession = src.Accession || 'OSD-N/A';
+          const organism = src.organism || 'N/A';
+          html += `
+            <div class="card" style="cursor:default;">
+              <div class="card-body">
+                <span class="tag" style="border-color:var(--accent2); color:var(--accent2)">OSD ID: ${accession}</span>
+                <div class="card-title">${title}</div>
+                <div class="card-info">
+                  <br>> Organismo: <b>${organism}</b>
+                  <br>> Missão: <b>${src["Flight Program"] || 'N/A'}</b>
+                </div>
               </div>
             </div>`;
         });
