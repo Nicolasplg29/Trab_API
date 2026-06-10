@@ -464,15 +464,33 @@
       try {
         const res = await fetch(url);
         if (!res.ok) {
-           // Se o servidor respondeu com erro, lê o detalhe estruturado
            const errData = await res.json().catch(() => ({ detail: `HTTP ${res.status} - Erro de resposta` }));
            throw new Error(errData.detail || `Erro HTTP ${res.status}`);
         }
         
         const data = await res.json();
+
+        // ── INTERCEPÇÃO DE ERRO ESTRUTURADO DO GATEWAY ──
+        // O backend retorna HTTP 200 mas com status 'error_detalhado' em casos de
+        // timeout, 403, 404, etc. Esse bloco trata antes de tentar renderizar.
+        if (data && data.status === 'error_detalhado') {
+          status.innerHTML = `<span style="color:var(--red)">❌ ${data.titulo}</span>`;
+          renderZone.innerHTML = `
+            <div class="alert-box">
+              <h2>${data.titulo}</h2>
+              <p>${data.mensagem}</p>
+              <p style="margin-top:15px; color:var(--accent); font-size:13px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+                <b>Como resolver:</b> ${data.solucao}
+              </p>
+              ${data.raw_detail ? `<p style="margin-top:10px; font-size:11px; color:var(--muted); font-family:monospace;">${data.raw_detail}</p>` : ''}
+              <button class="btn" style="margin-top:20px; background:var(--red); color:#fff;" onclick="fetchData()">↺ TENTAR NOVAMENTE</button>
+            </div>
+          `;
+          return;
+        }
+
         status.innerHTML = '✅ Dados recebidos.';
         
-        // Proteção extra contra quebra de rendering no frontend por dados inconsistentes da NASA
         try {
           drawCoolStuff(currentApiId, data);
           status.innerHTML = '✅ Telemetria de interface renderizada com sucesso.';
@@ -492,7 +510,6 @@
       } catch (err) {
         status.innerHTML = '<span style="color:var(--red)">❌ ERRO DE PROCESSAMENTO</span>';
         
-        // Distingue entre queda física do servidor ou um erro de status tratado pelo FastAPI
         let errorTitle = "CONEXÃO RECUSADA / SERVIDOR OFFLINE";
         let errorDesc = "O navegador não conseguiu contactar o servidor Backend. Certifique-se de que o FastAPI está rodando no terminal.";
         
@@ -527,7 +544,6 @@
     function drawCoolStuff(id, data) {
       const zone = document.getElementById('render-zone');
 
-      // Se o back-end devolveu a estrutura xml_raw ou vazia
       if (data.format === 'xml_raw') {
         return zone.innerHTML = `<div style="color:var(--muted); font-size:11px; margin-bottom:8px;">// RAW XML PAYLOAD</div><pre class="terminal">${data.preview.replace(/</g, '&lt;')}</pre>`;
       }
@@ -540,11 +556,10 @@
         `;
       }
 
-      // TRATATIVA DE ERRO DE ENDPOINT DESCONTINUADO OU OFFLINE (InSight & Mars Rover)
+      // TRATATIVA DE ENDPOINT OFFLINE (InSight & Mars Rover)
       if (data.status === 'offline_preservado') {
         const payload = data.payload;
         
-        // Se for o Mars Rover
         if (data.missao && data.missao.includes('Rover')) {
           let html = `
             <div class="alert-box" style="border-color:var(--amber); background:rgba(210,153,34,0.1); margin-bottom: 24px;">
@@ -567,7 +582,6 @@
           return zone.innerHTML = html + '</div>';
         }
 
-        // Se for a sonda InSight
         return zone.innerHTML = `
           <div class="alert-box" style="border-color:var(--amber); background:rgba(210,153,34,0.1); margin-bottom: 24px;">
             <h2>📡 TELEMETRIA DE CONTINGÊNCIA ATIVADA</h2>
@@ -824,7 +838,7 @@ ${item.line2}</pre>
         `;
       }
 
-      // 9. SSD/CNEOS FIREBALLS (Mapeamento Matricial Gráfico)
+      // 9. SSD/CNEOS FIREBALLS
       if (id === 'ssd') {
         if (!data.data || !data.data.length) {
           return zone.innerHTML = `<pre class="terminal">${colorJSON(data)}</pre>`;
