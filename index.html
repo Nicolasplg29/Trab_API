@@ -89,6 +89,23 @@
     .home-card ul li { margin-bottom: 8px; display: flex; align-items: center; gap: 8px;}
     .home-card ul li::before { content: '■'; color: var(--accent); font-size: 8px; }
 
+    /* ─── STYLE DO KANBAN DE CONQUISTAS ─── */
+    .kanban-board { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 24px; }
+    .kanban-column { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    .kanban-column-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
+    .kanban-column.todo .kanban-column-title { color: var(--amber); }
+    .kanban-column.progress .kanban-column-title { color: var(--accent); }
+    .kanban-column.done .kanban-column-title { color: var(--green); }
+    
+    .kanban-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: left; transition: 0.2s; }
+    .kanban-card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+    .kanban-card-title { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 13px; color: var(--text); margin-bottom: 4px; }
+    .kanban-card-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+    .kanban-card-badge { display: inline-block; margin-top: 8px; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; border: 1px solid transparent; }
+    .kanban-card-badge.tech { color: var(--accent2); border-color: rgba(188,140,255,0.2); background: rgba(188,140,255,0.05); }
+    .kanban-card-badge.infra { color: var(--accent); border-color: rgba(88,166,255,0.2); background: rgba(88,166,255,0.05); }
+    .kanban-card-badge.ux { color: var(--green); border-color: rgba(63,185,80,0.2); background: rgba(63,185,80,0.05); }
+
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
     .table-container { width: 100%; overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
     table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
@@ -114,7 +131,6 @@
     .apod-data h2 { font-family: 'Syne', sans-serif; font-size: 28px; margin-bottom: 10px; color: var(--text); line-height: 1.2;}
     .apod-data p { color: var(--muted); font-size: 14px; line-height: 1.8; margin-top: 20px; }
 
-    /* Earth Imagery */
     .earth-frame { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
     .earth-frame img { width: 100%; max-width: 480px; border-radius: 8px; border: 1px solid var(--border); background: #000; }
     .earth-data { flex: 1; min-width: 260px; }
@@ -251,8 +267,9 @@
       epic: {
         title: "Câmera EPIC (Planeta Terra)",
         desc: "Imagens reais diárias do nosso planeta (full disc) capturadas pelo satélite DSCOVR a 1 milhão de milhas de distância.",
-        call: "GET /epic/natural", return: "Array de metadados. O Front-end calcula a URL da imagem.",
-        path: "/epic/natural"
+        tips: "<b>Filtro Temporal:</b> Selecione uma data para carregar os registros específicos daquele dia no histórico da EPIC.",
+        call: "GET /epic/natural?date={AAAA-MM-DD}", return: "Array de metadados das imagens de satélite tiradas na data correspondente.",
+        path: "/epic/natural", inputType: "date", paramKey: "date"
       },
       earth: {
         title: "Imagens da Terra — Landsat 8",
@@ -374,7 +391,8 @@
           </div>
           <div class="home-card">
             <h3>APIs MAPEADAS (ENDPOINTS GET)</h3>
-            <ul>
+            <p>As rotas públicas mapeadas cobrem todos os serviços ativos da NASA catalogados na entrega:</p>
+            <ul style="max-height: 140px; overflow-y: auto; padding-right: 8px;">
               <li>APOD (Astronomy Picture of the Day)</li>
               <li>Earth Imagery / Assets (Landsat 8)</li>
               <li>NeoWs (Monitoramento de Asteroides)</li>
@@ -392,7 +410,66 @@
               <li>Mars Rover Photos (Curiosity)</li>
             </ul>
           </div>
-        </div>`;
+        </div>
+        
+        <!-- QUADRO KANBAN DE CONQUISTAS DO PROJETO -->
+        <h3 style="font-family:'Syne',sans-serif; text-transform:uppercase; letter-spacing:1px; margin-top:32px; font-size:18px; color:var(--accent);">
+          📊 Quadro Kanban de Módulos e Métricas Técnicas
+        </h3>
+        <div class="kanban-board">
+          <div class="kanban-column todo">
+            <div class="kanban-column-title">Backlog (Futuro)</div>
+            <div class="kanban-card">
+              <div class="kanban-card-title">Redis Cache Integration</div>
+              <div class="kanban-card-desc">Migrar o cache TTL do gateway em memória para um banco NoSQL distribuído.</div>
+              <span class="kanban-card-badge infra">Infraestrutura</span>
+            </div>
+            <div class="kanban-card">
+              <div class="kanban-card-title">Three.js 3D Space</div>
+              <div class="kanban-card-desc">Gerar órbitas TLE em modelos tridimensionais interativos na interface web.</div>
+              <span class="kanban-card-badge ux">Interface</span>
+            </div>
+          </div>
+          
+          <div class="kanban-column progress">
+            <div class="kanban-column-title">Em Validação</div>
+            <div class="kanban-card">
+              <div class="kanban-card-title">Análise de Latência</div>
+              <div class="kanban-card-desc">Otimização fina dos handshakes dos domínios da agência federal.</div>
+              <span class="kanban-card-badge tech">Pesquisa</span>
+            </div>
+            <div class="kanban-card">
+              <div class="kanban-card-title">Sanitização de XMLs</div>
+              <div class="kanban-card-desc">Aprimoramento do encoder ASCII nos payloads de capacidades GIBS/Trek.</div>
+              <span class="kanban-card-badge infra">Infraestrutura</span>
+            </div>
+          </div>
+          
+          <div class="kanban-column done">
+            <div class="kanban-column-title">Concluído (Entregue)</div>
+            <div class="kanban-card">
+              <div class="kanban-card-title">Refatoração Modular v7.0</div>
+              <div class="kanban-card-desc">Lógica encapsulada em sub-routers dedicados (Visual, Monitoramento, Ciência).</div>
+              <span class="kanban-card-badge infra">Infraestrutura</span>
+            </div>
+            <div class="kanban-card">
+              <div class="kanban-card-title">Cache TTL Dinâmico</div>
+              <div class="kanban-card-desc">Controle de cache temporizado otimizando limites de tráfego de rede.</div>
+              <span class="kanban-card-badge infra">Infraestrutura</span>
+            </div>
+            <div class="kanban-card">
+              <div class="kanban-card-title">Contingência Inteligente</div>
+              <div class="kanban-card-desc">Fallbacks offline para InSight, Mars Rover e Earth Landsat 8 descontinuados [2.3.1].</div>
+              <span class="kanban-card-badge tech">Funcional</span>
+            </div>
+            <div class="kanban-card">
+              <div class="kanban-card-title">Auto-Retry de Handshake</div>
+              <div class="kanban-card-desc">Recuperação incremental resiliente para falhas do proxy APOD (erros 503).</div>
+              <span class="kanban-card-badge tech">Funcional</span>
+            </div>
+          </div>
+        </div>
+      `;
     }
 
     function updateModuleUI(id) {

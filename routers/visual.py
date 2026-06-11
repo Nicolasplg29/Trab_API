@@ -1,9 +1,9 @@
 """
 routers/visual.py
 ─────────────────────────────────────────────────────────────────
-Endpoints de exploração visual:
+Endpoints de exploração visual documentados para o Swagger.
   - APOD (Astronomy Picture of the Day)
-  - EPIC (Câmera do satélite DSCOVR)
+  - EPIC (Câmera do satélite DSCOVR com filtro de data)
   - NASA Image & Video Library
   - Mars Rover Photos (Curiosity — contingência offline)
   - Earth Imagery / Assets (Landsat 8 — imagens de satélite da Terra)
@@ -21,9 +21,14 @@ def _hoje() -> str:
     return str(date.today())
 
 
-@router.get("/apod", summary="Astronomy Picture of the Day")
-async def apod(date: Optional[str] = Query(None, description="Data no formato AAAA-MM-DD")):
-    """Retorna a imagem ou vídeo astronômico do dia selecionado."""
+@router.get(
+    "/apod", 
+    summary="Astronomy Picture of the Day",
+    description="Retorna a imagem ou vídeo astronômico do dia selecionado com explicações detalhadas de astrônomos."
+)
+async def apod(
+    date: Optional[str] = Query(None, description="Data de captura desejada no formato AAAA-MM-DD")
+):
     return await get(
         "https://api.nasa.gov/planetary/apod",
         {"date": date or _hoje()},
@@ -31,15 +36,31 @@ async def apod(date: Optional[str] = Query(None, description="Data no formato AA
     )
 
 
-@router.get("/epic/natural", summary="Câmera EPIC — Planeta Terra")
-async def epic_natural():
-    """Imagens full-disc do planeta Terra capturadas pelo satélite DSCOVR."""
-    return await get("https://api.nasa.gov/EPIC/api/natural", perfil="rapido")
+@router.get(
+    "/epic/natural", 
+    summary="Câmera EPIC — Planeta Terra",
+    description="Imagens reais diárias do planeta Terra (disco completo) obtidas pelo satélite DSCOVR a 1 milhão de milhas de distância. Permite busca por data."
+)
+async def epic_natural(
+    date: Optional[str] = Query(None, description="Data específica das capturas no formato AAAA-MM-DD")
+):
+    if date:
+        # Formato esperado pela NASA para busca por data específica: /EPIC/api/natural/date/YYYY-MM-DD
+        url = f"https://api.nasa.gov/EPIC/api/natural/date/{date}"
+    else:
+        url = "https://api.nasa.gov/EPIC/api/natural"
+        
+    return await get(url, perfil="rapido")
 
 
-@router.get("/library/search", summary="NASA Image & Video Library")
-async def library_search(q: str = Query("space", description="Termo de busca em inglês")):
-    """Busca no acervo oficial de imagens e vídeos históricos da NASA."""
+@router.get(
+    "/library/search", 
+    summary="NASA Image & Video Library",
+    description="Acesso ao mecanismo de busca oficial para mídias, vídeos e arquivos históricos da agência espacial."
+)
+async def library_search(
+    q: str = Query("space", description="Palavra-chave em inglês para busca no acervo")
+):
     return await get(
         "https://images-api.nasa.gov/search",
         {"q": q, "media_type": "image"},
@@ -48,32 +69,31 @@ async def library_search(q: str = Query("space", description="Termo de busca em 
     )
 
 
-@router.get("/earth/imagery", summary="Earth Imagery — Foto de Satélite Landsat 8")
+@router.get(
+    "/earth/imagery", 
+    summary="Earth Imagery — Foto de Satélite Landsat 8",
+    description="Resgata imagens de sensoriamento remoto multiespectral geradas pelo Landsat 8."
+)
 async def earth_imagery(
-    lat: float = Query(..., description="Latitude (ex: -23.55 para São Paulo)"),
-    lon: float = Query(..., description="Longitude (ex: -46.63 para São Paulo)"),
+    lat: float = Query(..., description="Latitude geográfica (-90 a 90)"),
+    lon: float = Query(..., description="Longitude geográfica (-180 a 180)"),
     date: Optional[str] = Query(None, description="Data no formato AAAA-MM-DD"),
-    dim: float = Query(0.025, description="Graus de largura/altura da imagem (padrão: 0.025)"),
+    dim: float = Query(0.025, description="Graus de dimensão espectral da imagem")
 ):
-    """
-    O serviço de imagens de satélite (Earth Assets) foi arquivado e desativado pela NASA.
-    Retorna metadados e imagens reais Landsat 8 de contingência.
-    """
     return await earth_assets(lat, lon, date, dim)
 
 
-@router.get("/earth/assets", summary="Earth Assets — Metadados Landsat 8")
+@router.get(
+    "/earth/assets", 
+    summary="Earth Assets — Metadados Landsat 8",
+    description="Retorna metadados e caminhos de imagens Landsat 8 correspondentes às coordenadas fornecidas com contingência local."
+)
 async def earth_assets(
-    lat: float = Query(..., description="Latitude (ex: -23.55 para São Paulo)"),
-    lon: float = Query(..., description="Longitude (ex: -46.63 para São Paulo)"),
-    date: Optional[str] = Query(None, description="Data no formato AAAA-MM-DD"),
-    dim: float = Query(0.025, description="Graus de largura/altura da imagem (padrão: 0.025)"),
+    lat: float = Query(..., description="Latitude geográfica do ponto terrestre"),
+    lon: float = Query(..., description="Longitude geográfica do ponto terrestre"),
+    date: Optional[str] = Query(None, description="Data de referência AAAA-MM-DD"),
+    dim: float = Query(0.025, description="Filtro dimensional")
 ):
-    """
-    Retorna metadados e imagens reais do Landsat 8 de contingência, mapeando inteligente
-    os locais sugeridos nos exemplos de uso do usuário.
-    """
-    # Tolerância de proximidade para fornecer os dados reais dos pontos sugeridos
     # São Paulo: Lat -23.55, Lon -46.63
     if abs(lat - (-23.55)) < 1.5 and abs(lon - (-46.63)) < 1.5:
         return {
@@ -83,7 +103,6 @@ async def earth_assets(
             "service_version": "v1",
             "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Sao_Paulo_metropolitan_area_Landsat_8.jpg/1024px-Sao_Paulo_metropolitan_area_Landsat_8.jpg"
         }
-        
     # Rio de Janeiro: Lat -22.90, Lon -43.17
     elif abs(lat - (-22.90)) < 1.5 and abs(lon - (-43.17)) < 1.5:
         return {
@@ -93,7 +112,6 @@ async def earth_assets(
             "service_version": "v1",
             "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Rio_de_Janeiro_metropolitan_area_Landsat_8.jpg/1024px-Rio_de_Janeiro_metropolitan_area_Landsat_8.jpg"
         }
-        
     # Brasília: Lat -15.78, Lon -47.93
     elif abs(lat - (-15.78)) < 1.5 and abs(lon - (-47.93)) < 1.5:
         return {
@@ -103,7 +121,6 @@ async def earth_assets(
             "service_version": "v1",
             "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Brasilia_landsat.jpg/1024px-Brasilia_landsat.jpg"
         }
-        
     # Amazon River: Lat -3.10, Lon -60.02
     elif abs(lat - (-3.10)) < 2.5 and abs(lon - (-60.02)) < 2.5:
         return {
@@ -113,24 +130,22 @@ async def earth_assets(
             "service_version": "v1",
             "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Meeting_of_Waters_Manaus_Landsat.jpg/1024px-Meeting_of_Waters_Manaus_Landsat.jpg"
         }
-        
-    # Fallback genérico se o usuário buscar qualquer outra coordenada
     else:
         return {
             "date": f"{date or '2024-05-15'}T14:22:11",
-            "id": f"LC08_L1TP_FALLBACK_VAL_{int(abs(lat))}_{int(abs(lon))}",
+            "id": f"LC08_L1TP_FALLBACK_{int(abs(lat))}_{int(abs(lon))}",
             "resource": {"dataset": "LC08", "planet": "earth"},
             "service_version": "v1",
             "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Great_Salt_Lake_Landsat_8.jpg/1024px-Great_Salt_Lake_Landsat_8.jpg"
         }
 
 
-@router.get("/mars/curiosity/photos", summary="Mars Rover — Curiosity (Contingência)")
+@router.get(
+    "/mars/curiosity/photos", 
+    summary="Mars Rover — Curiosity (Contingência)",
+    description="Retorna dados e fotografias de solo arquivados das câmeras do robô Curiosity."
+)
 async def mars_photos():
-    """
-    A API oficial do Mars Rover foi descontinuada pela NASA.
-    Retorna telemetria histórica real preservada no gateway.
-    """
     return {
         "status": "offline_preservado",
         "missao": "Mars Rover Curiosity",
